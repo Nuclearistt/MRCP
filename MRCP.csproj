@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<OutputType>Exe</OutputType>
+		<Version>1.0.0</Version>
+		<ApplicationManifest>res/MRCP.manifest</ApplicationManifest>
+		<Authors>Nuclearist</Authors>
+		<Product>Steam Manifest Request Code Provider</Product>
+		<Copyright>Copyright © 2024 Nuclearist</Copyright>
+		<AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
+		<ImplicitUsings>Enable</ImplicitUsings>
+		<Nullable>Enable</Nullable>
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+		<InvariantGlobalization>True</InvariantGlobalization>
+		<JsonSerializerIsReflectionEnabledByDefault>False</JsonSerializerIsReflectionEnabledByDefault>
+		<WindowsKitRoot Condition="$([MSBuild]::IsOSPlatform('Windows'))">$([MSBuild]::GetRegistryValue('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows Kits\Installed Roots', 'KitsRoot10'))</WindowsKitRoot>
+		<SignToolPath Condition="'$(WindowsKitRoot)' != ''">$(WindowsKitRoot)App Certification Kit\signtool.exe</SignToolPath>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<Optimize>True</Optimize>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>MRCP.snk</AssemblyOriginatorKeyFile>
+		<DelaySign>False</DelaySign>
+		<PublishAot>True</PublishAot>
+		<OptimizationPreference>Speed</OptimizationPreference>
+		<EnableUnsafeBinaryFormatterSerialization>False</EnableUnsafeBinaryFormatterSerialization>
+		<EnableUnsafeUTF7Encoding>False</EnableUnsafeUTF7Encoding>
+		<MetadataUpdaterSupport>False</MetadataUpdaterSupport>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="TEKSteamClient" Version="1.4.1" />
+	</ItemGroup>
+	<Target Name="SignFile" AfterTargets="ComputeAndCopyFilesToPublishDirectory" Condition="$([MSBuild]::IsOSPlatform('Windows')) And exists('$(SignToolPath)')">
+		<Exec Command="call &quot;$(SignToolPath)&quot; sign /tr http://timestamp.digicert.com /td sha256 /fd sha256 /a bin\Release\win-x64\publish\MRCP.exe" />
+	</Target>
+</Project>
